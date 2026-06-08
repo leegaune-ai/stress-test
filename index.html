@@ -70,6 +70,13 @@ input[type="radio"]{
   margin: 0 8px;
   cursor: pointer;
 }
+
+#showResult {
+  display: block !important;
+  position: relative;
+  background: white;
+}
+
 </style>
 
 <style>
@@ -1089,31 +1096,40 @@ document.getElementById("typeDescriptions").innerHTML =
 function downloadPDF() {
   const element = document.getElementById("showResult");
 
-  // 1. PDF 찍기 전에 잠깐 보이게 만들기
-  const originalDisplay = element.style.display;
   element.style.display = "block";
 
-  // 2. 브라우저 렌더링 기다리기
+  // ⭐ 중요: 레이아웃 강제 확정
+  document.body.style.overflow = "visible";
+
   setTimeout(() => {
 
-    const opt = {
-      margin: 0.3,
-      filename: 'stress_result.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-    };
-
     html2pdf()
-      .set(opt)
-      .from(element)
-      .save()
-      .then(() => {
-        // 3. 원래 상태로 복구
-        element.style.display = originalDisplay;
-      });
+      .set({
+        margin: 0.3,
+        filename: 'stress_result.pdf',
 
-  }, 300);
+        image: {
+          type: 'jpeg',
+          quality: 1
+        },
+
+        html2canvas: {
+          scale: 2,          // ⭐ 모바일에서는 3 → 2로 낮춰야 안정됨
+          useCORS: true,
+          scrollY: 0,
+          windowWidth: document.body.scrollWidth
+        },
+
+        jsPDF: {
+          unit: 'in',
+          format: 'a4',
+          orientation: 'portrait'
+        }
+      })
+      .from(element)
+      .save();
+
+  }, 800); // 1초 → 0.8초로 줄여도 됨 (오히려 안정적)
 }
 
 </script>
