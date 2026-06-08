@@ -1086,9 +1086,20 @@ document.getElementById("typeDescriptions").innerHTML =
 }
 
 function downloadPDF() {
-  const element = document.getElementById("showResult");
 
-  // 🔥 핵심: 화면 렌더링 시간 조금 기다리기
+  const source = document.getElementById("showResult");
+
+  // 🔥 1. DOM 복사본 생성
+  const clone = source.cloneNode(true);
+
+  // 🔥 2. 화면에 안 보이게 숨겨서 붙이기
+  clone.style.position = "absolute";
+  clone.style.left = "-9999px";
+  clone.style.top = "0";
+  clone.style.background = "white";
+
+  document.body.appendChild(clone);
+
   setTimeout(() => {
 
     const opt = {
@@ -1098,8 +1109,7 @@ function downloadPDF() {
 
       html2canvas: {
         scale: 2,
-        useCORS: true,
-        scrollY: 0
+        useCORS: true
       },
 
       jsPDF: {
@@ -1111,10 +1121,13 @@ function downloadPDF() {
 
     html2pdf()
       .set(opt)
-      .from(element)
-      .save();
+      .from(clone)
+      .save()
+      .then(() => {
+        document.body.removeChild(clone); // 🔥 정리
+      });
 
-  }, 300); // 🔥 0.3초 기다렸다가 PDF 생성
+  }, 300);
 }
 
 </script>
