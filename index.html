@@ -501,8 +501,7 @@ input[type="radio"]{
 </div>
 
 <!-- 결과창 -->
-<div id="showResult" style="display:none;" class="container mt-5">
-
+<div id="showResult" class="container mt-5" style="display:block;">
   <!-- 결과 카드 -->
   <div class="card shadow-lg border-0 mb-4">
     <div class="card-body text-center p-5">
@@ -982,7 +981,9 @@ function showResult() {
   }
 
   document.getElementById("set4").style.display = "none";
-  document.getElementById("showResult").style.display = "block";
+const result = document.getElementById("showResult");
+result.style.display = "block";
+result.style.opacity = "1";
 
   let relationScore = 0;
   let physicalScore = 0;
@@ -1086,56 +1087,41 @@ document.getElementById("typeDescriptions").innerHTML =
 }
 
 function downloadPDF() {
+  const element = document.getElementById("showResult");
 
-  const source = document.getElementById("showResult");
+  // 1. 강제로 보이게 만들기 (모바일 핵심 해결)
+  const originalDisplay = element.style.display;
+  element.style.display = "block";
 
-  const clone = source.cloneNode(true);
-
-  // 🔥 화면 밖에 제대로 렌더되게 (핵심)
-  clone.style.position = "absolute";
-  clone.style.left = "0";
-  clone.style.top = "0";
-  clone.style.width = "794px";
-  clone.style.background = "white";
-  clone.style.zIndex = "-1";
-  clone.style.visibility = "visible";
-
-  document.body.appendChild(clone);
-
-  // 🔥 핵심: "렌더링 강제 완료 후 캡처"
+  // 2. 잠깐 렌더링 기다리기
   setTimeout(() => {
 
-    requestAnimationFrame(() => {
+    const opt = {
+      margin: 0.5,
+      filename: 'stress_result.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        scrollY: 0
+      },
+      jsPDF: {
+        unit: 'in',
+        format: 'a4',
+        orientation: 'portrait'
+      }
+    };
 
-      const opt = {
-        margin: 0.5,
-        filename: 'stress_result.pdf',
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .save()
+      .then(() => {
+        // 원래 상태 복구
+        element.style.display = originalDisplay;
+      });
 
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          scrollY: 0,
-          windowWidth: 794
-        },
-
-        jsPDF: {
-          unit: 'in',
-          format: 'a4',
-          orientation: 'portrait'
-        }
-      };
-
-      html2pdf()
-        .set(opt)
-        .from(clone)
-        .save()
-        .then(() => {
-          document.body.removeChild(clone);
-        });
-
-    });
-
-  }, 800); // 🔥 모바일은 0.8초가 안전
+  }, 300);
 }
 
 </script>
