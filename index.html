@@ -72,9 +72,7 @@ input[type="radio"]{
 }
 
 #showResult {
-  display: block !important;
-  position: relative;
-  background: white;
+  display: none;
 }
 
 </style>
@@ -1096,40 +1094,42 @@ document.getElementById("typeDescriptions").innerHTML =
 function downloadPDF() {
   const element = document.getElementById("showResult");
 
+  // 1. 무조건 보이게
   element.style.display = "block";
 
-  // ⭐ 중요: 레이아웃 강제 확정
-  document.body.style.overflow = "visible";
+  // 2. 스크롤 최상단
+  window.scrollTo(0, 0);
 
-  setTimeout(() => {
+  // 3. 완전 렌더링 기다리기 (중요)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
 
-    html2pdf()
-      .set({
-        margin: 0.3,
-        filename: 'stress_result.pdf',
+      html2pdf()
+        .set({
+          margin: 0.3,
+          filename: 'stress_result.pdf',
+          image: { type: 'jpeg', quality: 1 },
 
-        image: {
-          type: 'jpeg',
-          quality: 1
-        },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            scrollY: 0,
+            windowWidth: document.documentElement.scrollWidth,
+            windowHeight: document.documentElement.scrollHeight,
+            backgroundColor: "#ffffff"
+          },
 
-        html2canvas: {
-          scale: 2,          // ⭐ 모바일에서는 3 → 2로 낮춰야 안정됨
-          useCORS: true,
-          scrollY: 0,
-          windowWidth: document.body.scrollWidth
-        },
+          jsPDF: {
+            unit: 'in',
+            format: 'a4',
+            orientation: 'portrait'
+          }
+        })
+        .from(element)
+        .save();
 
-        jsPDF: {
-          unit: 'in',
-          format: 'a4',
-          orientation: 'portrait'
-        }
-      })
-      .from(element)
-      .save();
-
-  }, 800); // 1초 → 0.8초로 줄여도 됨 (오히려 안정적)
+    });
+  });
 }
 
 </script>
