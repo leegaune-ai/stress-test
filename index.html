@@ -1089,27 +1089,19 @@ document.getElementById("typeDescriptions").innerHTML =
 function downloadPDF() {
   const element = document.getElementById("showResult");
 
-  // 1. 강제로 보이게 만들기 (모바일 핵심 해결)
+  // 1. PDF 찍기 전에 잠깐 보이게 만들기
   const originalDisplay = element.style.display;
   element.style.display = "block";
 
-  // 2. 잠깐 렌더링 기다리기
+  // 2. 브라우저 렌더링 기다리기
   setTimeout(() => {
 
     const opt = {
-      margin: 0.5,
+      margin: 0.3,
       filename: 'stress_result.pdf',
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        scrollY: 0
-      },
-      jsPDF: {
-        unit: 'in',
-        format: 'a4',
-        orientation: 'portrait'
-      }
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
 
     html2pdf()
@@ -1117,7 +1109,7 @@ function downloadPDF() {
       .from(element)
       .save()
       .then(() => {
-        // 원래 상태 복구
+        // 3. 원래 상태로 복구
         element.style.display = originalDisplay;
       });
 
