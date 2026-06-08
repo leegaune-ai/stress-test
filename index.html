@@ -1091,45 +1091,51 @@ function downloadPDF() {
 
   const clone = source.cloneNode(true);
 
-  // 🔥 모바일 안정화 핵심
-  clone.style.position = "fixed";
+  // 🔥 화면 밖에 제대로 렌더되게 (핵심)
+  clone.style.position = "absolute";
   clone.style.left = "0";
   clone.style.top = "0";
-  clone.style.width = "794px"; // A4 기준 강제 고정
+  clone.style.width = "794px";
   clone.style.background = "white";
-  clone.style.zIndex = "-9999";
+  clone.style.zIndex = "-1";
+  clone.style.visibility = "visible";
 
   document.body.appendChild(clone);
 
+  // 🔥 핵심: "렌더링 강제 완료 후 캡처"
   setTimeout(() => {
 
-    const opt = {
-      margin: 0.5,
-      filename: 'stress_result.pdf',
+    requestAnimationFrame(() => {
 
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        scrollY: 0,
-        windowWidth: 794 // 🔥 핵심 (모바일 깨짐 방지)
-      },
+      const opt = {
+        margin: 0.5,
+        filename: 'stress_result.pdf',
 
-      jsPDF: {
-        unit: 'in',
-        format: 'a4',
-        orientation: 'portrait'
-      }
-    };
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          scrollY: 0,
+          windowWidth: 794
+        },
 
-    html2pdf()
-      .set(opt)
-      .from(clone)
-      .save()
-      .then(() => {
-        document.body.removeChild(clone);
-      });
+        jsPDF: {
+          unit: 'in',
+          format: 'a4',
+          orientation: 'portrait'
+        }
+      };
 
-  }, 500); // 🔥 모바일은 0.5초가 안전
+      html2pdf()
+        .set(opt)
+        .from(clone)
+        .save()
+        .then(() => {
+          document.body.removeChild(clone);
+        });
+
+    });
+
+  }, 800); // 🔥 모바일은 0.8초가 안전
 }
 
 </script>
